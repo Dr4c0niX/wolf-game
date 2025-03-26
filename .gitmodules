@@ -16,3 +16,6 @@
 [submodule "wolf-tcp-server"]
 	path = wolf-tcp-server
 	url = https://github.com/Dr4c0niX/wolf-tcp-server
+[submodule "wolf-http-server"]
+	path = wolf-http-server
+	url = https://github.com/Dr4c0niX/wolf-http-server
