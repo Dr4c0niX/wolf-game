@@ -58,3 +58,35 @@ BEGIN
     RETURN role_id;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Fonction pour récup les infos du vainqueur d'une partie donnée
+CREATE OR REPLACE FUNCTION get_the_winner(party_id INT) RETURNS TABLE(
+    player_name VARCHAR,
+    role_name VARCHAR,
+    party_name VARCHAR,
+    turns_played INT,
+    total_turns INT,
+    avg_decision_time INTERVAL
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        p.pseudo AS player_name,
+        r.role_name AS role_name,
+        pa.title_party AS party_name,
+        COUNT(DISTINCT t.id_turn) AS turns_played,
+        pa.max_turns AS total_turns,
+        AVG(pp.end_time - pp.start_time) AS avg_decision_time
+    FROM players_in_parties pip
+    JOIN players p ON pip.id_player = p.id_player
+    JOIN roles r ON pip.id_role = r.id_role
+    JOIN parties pa ON pip.id_party = pa.id_party
+    JOIN players_play pp ON pip.id_player = pp.id_player AND pip.id_party = pp.id_party
+    JOIN turns t ON pp.id_turn = t.id_turn
+    WHERE pip.id_party = party_id
+    AND pip.is_alive = TRUE
+    GROUP BY p.pseudo, r.role_name, pa.title_party, pa.max_turns
+    ORDER BY turns_played DESC, avg_decision_time ASC
+    LIMIT 1;  -- Sélectionne le joueur le plus performant
+END;
+$$ LANGUAGE plpgsql;
