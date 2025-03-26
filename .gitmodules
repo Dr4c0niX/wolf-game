@@ -10,9 +10,6 @@
 [submodule "wolf-http-client-tkinter"]
 	path = wolf-http-client-tkinter
 	url = https://github.com/Dr4c0niX/wolf-http-client-tkinter
-[submodule "wolf-http-server"]
-	path = wolf-http-server
-	url = https://github.com/Dr4c0niX/wolf-http-server
 [submodule "wolf-tcp-client-tkinter"]
 	path = wolf-tcp-client-tkinter
 	url = https://github.com/Dr4c0niX/wolf-tcp-client-tkinter
