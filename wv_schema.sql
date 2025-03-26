@@ -38,15 +38,15 @@ CREATE TABLE player_party (
 CREATE TABLE obstacles (
     id_obstacle SERIAL PRIMARY KEY,
     id_party INT REFERENCES parties(id_party),
-    row INT NOT NULL,
-    col INT NOT NULL,
+    row INT NOT NULL CHECK (row >= 0),
+    col INT NOT NULL CHECK (col >= 0),
     UNIQUE(id_party, row, col)
 );
 
 CREATE TABLE turns (
     id_turn SERIAL PRIMARY KEY,
     id_party INT REFERENCES parties(id_party),
-    turn_number INT NOT NULL,
+    turn_number INT NOT NULL CHECK (turn_number >= 1),
     started_at TIMESTAMP,
     ended_at TIMESTAMP,
     UNIQUE(id_party, turn_number)
@@ -56,8 +56,8 @@ CREATE TABLE positions (
     id_position SERIAL PRIMARY KEY,
     id_player_party INT REFERENCES player_party(id_player_party),
     id_turn INT REFERENCES turns(id_turn),
-    row INT NOT NULL,
-    col INT NOT NULL,
+    row INT NOT NULL CHECK (row >= 0),
+    col INT NOT NULL CHECK (col >= 0),
     UNIQUE(id_player_party, id_turn)
 );
 
