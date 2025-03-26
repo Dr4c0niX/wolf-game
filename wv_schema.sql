@@ -1,72 +1,64 @@
--- Création des tables de base
+-- Table des parties
+CREATE TABLE parties (
+    id_party SERIAL PRIMARY KEY,
+    title_party VARCHAR(100) NOT NULL,
+    grid_size INT NOT NULL DEFAULT 10,
+    max_players INT NOT NULL DEFAULT 8,
+    max_turns INT NOT NULL DEFAULT 30,
+    turn_duration INT NOT NULL DEFAULT 60, -- en secondes
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_started BOOLEAN DEFAULT FALSE,
+    is_finished BOOLEAN DEFAULT FALSE
+);
 
+-- Table des rôles
+CREATE TABLE roles (
+    id_role SERIAL PRIMARY KEY,
+    role_name VARCHAR(10) NOT NULL UNIQUE,
+    description_role TEXT NOT NULL
+);
+
+-- Table des joueurs
 CREATE TABLE players (
     id_player SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
+    pseudo VARCHAR(50) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_online TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE parties (
-    id_party SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    rows INT NOT NULL CHECK (rows BETWEEN 5 AND 100),
-    cols INT NOT NULL CHECK (cols BETWEEN 5 AND 100),
-    max_players INT NOT NULL CHECK (max_players BETWEEN 2 AND 50),
-    max_turns INT NOT NULL CHECK (max_turns BETWEEN 10 AND 200),
-    turn_duration INT NOT NULL CHECK (turn_duration BETWEEN 10 AND 300),
-    nb_obstacles INT NOT NULL CHECK (nb_obstacles >= 0),
-    nb_wolves INT NOT NULL CHECK (nb_wolves >= 1),
-    nb_villagers INT NOT NULL CHECK (nb_villagers >= 1),
-    started BOOLEAN DEFAULT FALSE,
-    finished BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CHECK (nb_wolves + nb_villagers <= max_players)
-);
-
-CREATE TABLE player_party (
-    id_player_party SERIAL PRIMARY KEY,
-    id_player INT REFERENCES players(id_player),
-    id_party INT REFERENCES parties(id_party),
-    role VARCHAR(10) CHECK (role IN ('wolf', 'villager')),
-    is_npc BOOLEAN DEFAULT FALSE,
+-- Table de liaison joueurs-parties
+CREATE TABLE players_in_parties (
+    id_party INT NOT NULL REFERENCES parties(id_party) ON DELETE CASCADE,
+    id_player INT NOT NULL REFERENCES players(id_player) ON DELETE CASCADE,
+    id_role INT NOT NULL REFERENCES roles(id_role),
     is_alive BOOLEAN DEFAULT TRUE,
-    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(id_player, id_party)
+    current_row INT,
+    current_col INT,
+    PRIMARY KEY (id_party, id_player)
 );
 
-CREATE TABLE obstacles (
-    id_obstacle SERIAL PRIMARY KEY,
-    id_party INT REFERENCES parties(id_party),
-    row INT NOT NULL CHECK (row >= 0),
-    col INT NOT NULL CHECK (col >= 0),
-    UNIQUE(id_party, row, col)
-);
-
+-- Table des tours
 CREATE TABLE turns (
     id_turn SERIAL PRIMARY KEY,
-    id_party INT REFERENCES parties(id_party),
-    turn_number INT NOT NULL CHECK (turn_number >= 1),
-    started_at TIMESTAMP,
-    ended_at TIMESTAMP,
-    UNIQUE(id_party, turn_number)
+    id_party INT NOT NULL REFERENCES parties(id_party) ON DELETE CASCADE,
+    turn_number INT NOT NULL,
+    start_time TIMESTAMP,
+    end_time TIMESTAMP,
+    UNIQUE (id_party, turn_number)
 );
 
-CREATE TABLE positions (
-    id_position SERIAL PRIMARY KEY,
-    id_player_party INT REFERENCES player_party(id_player_party),
-    id_turn INT REFERENCES turns(id_turn),
-    row INT NOT NULL CHECK (row >= 0),
-    col INT NOT NULL CHECK (col >= 0),
-    UNIQUE(id_player_party, id_turn)
-);
-
-CREATE TABLE moves (
-    id_move SERIAL PRIMARY KEY,
-    id_player_party INT REFERENCES player_party(id_player_party),
-    id_turn INT REFERENCES turns(id_turn),
-    row_delta INT NOT NULL CHECK (row_delta BETWEEN -1 AND 1),
-    col_delta INT NOT NULL CHECK (col_delta BETWEEN -1 AND 1),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(id_player_party, id_turn)
+-- Table des actions des joueurs
+CREATE TABLE players_play (
+    id SERIAL PRIMARY KEY,
+    id_player INT NOT NULL,
+    id_turn INT NOT NULL REFERENCES turns(id_turn) ON DELETE CASCADE,
+    id_party INT NOT NULL,
+    action VARCHAR(10) NOT NULL CHECK (action IN ('move', 'attack', 'pass')),
+    start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_time TIMESTAMP,
+    origin_position_row INT NOT NULL,
+    origin_position_col INT NOT NULL,
+    target_position_row INT,
+    target_position_col INT,
+    FOREIGN KEY (id_party, id_player) REFERENCES players_in_parties(id_party, id_player)
 );
