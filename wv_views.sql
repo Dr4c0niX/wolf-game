@@ -56,3 +56,42 @@ JOIN parties pa ON pa.id_party = pip.id_party
 JOIN players_play pp ON pp.id_player = p.id_player AND pp.id_party = pa.id_party
 GROUP BY p.pseudo, pa.title_party
 ORDER BY player_name ASC, party_name ASC;
+
+-- Vue ALL_PLAYERS_ELAPSED_TOUR
+CREATE VIEW ALL_PLAYERS_ELAPSED_TOUR AS
+SELECT 
+    p.pseudo AS player_name,
+    pa.title_party AS party_name,
+    t.turn_number AS turn_number,
+    t.start_time AS turn_start_time,
+    pp.start_time AS decision_time,
+    EXTRACT(EPOCH FROM (pp.start_time - t.start_time)) AS decision_time_seconds
+FROM players p
+JOIN players_in_parties pip ON pip.id_player = p.id_player
+JOIN parties pa ON pa.id_party = pip.id_party
+JOIN turns t ON t.id_party = pa.id_party
+JOIN players_play pp ON pp.id_player = p.id_player AND pp.id_turn = t.id_turn AND pp.id_party = pa.id_party
+ORDER BY player_name ASC, party_name ASC, turn_number ASC;
+
+-- Vue ALL_PLAYERS_STATS
+CREATE VIEW ALL_PLAYERS_STATS AS
+SELECT
+    p.pseudo AS player_name,
+    r.role_name AS player_role,
+    pa.title_party AS party_name,
+    COUNT(DISTINCT t.turn_number) AS number_of_turns_played,
+    COUNT(DISTINCT t.turn_number) OVER(PARTITION BY pa.id_party) AS total_turns_in_party,
+    CASE
+        WHEN pa.is_finished AND r.role_name = 'loup' THEN 'Loup gagnant'
+        WHEN pa.is_finished AND r.role_name = 'villageois' THEN 'Villageois gagnant'
+        ELSE 'En cours'
+    END AS winner,
+    AVG(EXTRACT(EPOCH FROM (pp.start_time - t.start_time))) AS avg_decision_time_seconds
+FROM players p
+JOIN players_in_parties pip ON pip.id_player = p.id_player
+JOIN roles r ON r.id_role = pip.id_role
+JOIN parties pa ON pa.id_party = pip.id_party
+JOIN turns t ON t.id_party = pa.id_party
+JOIN players_play pp ON pp.id_player = p.id_player AND pp.id_turn = t.id_turn AND pp.id_party = pa.id_party
+GROUP BY p.pseudo, r.role_name, pa.title_party
+ORDER BY player_name ASC, party_name ASC, number_of_turns_played DESC;
