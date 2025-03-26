@@ -20,7 +20,7 @@ CREATE TABLE parties (
     nb_villagers INT NOT NULL CHECK (nb_villagers >= 1),
     started BOOLEAN DEFAULT FALSE,
     finished BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CHECK (nb_wolves + nb_villagers <= max_players)
 );
 
