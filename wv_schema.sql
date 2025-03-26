@@ -4,22 +4,24 @@ CREATE TABLE players (
     id_player SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    last_online TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE parties (
     id_party SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    rows INT NOT NULL,
-    cols INT NOT NULL,
-    max_players INT NOT NULL,
-    max_turns INT NOT NULL,
-    turn_duration INT NOT NULL,
-    nb_obstacles INT NOT NULL,
-    nb_wolves INT NOT NULL,
-    nb_villagers INT NOT NULL,
+    rows INT NOT NULL CHECK (rows BETWEEN 5 AND 100),
+    cols INT NOT NULL CHECK (cols BETWEEN 5 AND 100),
+    max_players INT NOT NULL CHECK (max_players BETWEEN 2 AND 50),
+    max_turns INT NOT NULL CHECK (max_turns BETWEEN 10 AND 200),
+    turn_duration INT NOT NULL CHECK (turn_duration BETWEEN 10 AND 300),
+    nb_obstacles INT NOT NULL CHECK (nb_obstacles >= 0),
+    nb_wolves INT NOT NULL CHECK (nb_wolves >= 1),
+    nb_villagers INT NOT NULL CHECK (nb_villagers >= 1),
     started BOOLEAN DEFAULT FALSE,
     finished BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    CHECK (nb_wolves + nb_villagers <= max_players)
 );
 
 CREATE TABLE player_party (
