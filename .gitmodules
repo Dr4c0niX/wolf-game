@@ -1,0 +1,21 @@
+[submodule "wolf-admin-engine"]
+	path = wolf-admin-engine
+	url = https://github.com/Dr4c0niX/wolf-admin-engine
+[submodule "wolf-game-engine"]
+	path = wolf-game-engine
+	url = https://github.com/Dr4c0niX/wolf-game-engine
+[submodule "wolf-http-client-terminal"]
+	path = wolf-http-client-terminal
+	url = https://github.com/Dr4c0niX/wolf-http-client-terminal
+[submodule "wolf-http-client-tkinter"]
+	path = wolf-http-client-tkinter
+	url = https://github.com/Dr4c0niX/wolf-http-client-tkinter
+[submodule "wolf-http-server"]
+	path = wolf-http-server
+	url = https://github.com/Dr4c0niX/wolf-http-server
+[submodule "wolf-tcp-client-tkinter"]
+	path = wolf-tcp-client-tkinter
+	url = https://github.com/Dr4c0niX/wolf-tcp-client-tkinter
+[submodule "wolf-tcp-server"]
+	path = wolf-tcp-server
+	url = https://github.com/Dr4c0niX/wolf-tcp-server
