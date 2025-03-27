@@ -14,6 +14,26 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./sql:/docker-entrypoint-initdb.d
+    healthcheck:  # <-- Déplacé au niveau des autres propriétés du service db
+      test: ["CMD-SHELL", "pg_isready -U wolf_admin -d wolf_game"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  admin:
+    build: ./wolf-admin-engine
+    container_name: wolf_admin
+    restart: unless-stopped
+    environment:
+      FLASK_ENV: development
+      DATABASE_URL: "postgresql://wolf_admin:motdepasse_secure@db/wolf_game"
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./wolf-admin-engine:/app
 
 volumes:
   pgdata:
