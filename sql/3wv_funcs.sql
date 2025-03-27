@@ -1,12 +1,14 @@
--- Fonction pour obtenir position aléatoire qui n'a jamais été choisie dans une partie donnée
-CREATE OR REPLACE FUNCTION random_position(party_id INT) RETURNS TABLE(row INT, col INT) AS $$
+CREATE OR REPLACE FUNCTION random_position(party_id INT) 
+RETURNS SETOF RECORD AS $$
 DECLARE
     grid_size INT;
     chosen_row INT;
     chosen_col INT;
 BEGIN
     -- Récupérer taille grille
-    SELECT p.grid_size INTO grid_size FROM parties p WHERE p.id_party = party_id;
+    SELECT p.grid_size INTO grid_size 
+    FROM parties p 
+    WHERE p.id_party = party_id;
 
     -- Trouver une position non occupée aléatoirement
     LOOP
@@ -24,6 +26,7 @@ BEGIN
         END IF;
     END LOOP;
 
+    -- Retourner la position choisie
     RETURN QUERY SELECT chosen_row, chosen_col;
 END;
 $$ LANGUAGE plpgsql;
