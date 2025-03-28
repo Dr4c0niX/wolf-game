@@ -73,14 +73,21 @@ JOIN turns t ON t.id_party = pa.id_party
 JOIN players_play pp ON pp.id_player = p.id_player AND pp.id_turn = t.id_turn AND pp.id_party = pa.id_party
 ORDER BY player_name ASC, party_name ASC, turn_number ASC;
 
--- Vue ALL_PLAYERS_STATS
 CREATE VIEW ALL_PLAYERS_STATS AS
+WITH party_turns AS (
+    SELECT 
+        pa.id_party,
+        COUNT(DISTINCT t.turn_number) AS total_turns
+    FROM parties pa
+    LEFT JOIN turns t ON t.id_party = pa.id_party
+    GROUP BY pa.id_party
+)
 SELECT
     p.pseudo AS player_name,
     r.role_name AS player_role,
     pa.title_party AS party_name,
     COUNT(DISTINCT t.turn_number) AS number_of_turns_played,
-    COUNT(DISTINCT t.turn_number) OVER(PARTITION BY pa.id_party) AS total_turns_in_party,
+    pt.total_turns AS total_turns_in_party,
     CASE
         WHEN pa.is_finished AND r.role_name = 'loup' THEN 'Loup gagnant'
         WHEN pa.is_finished AND r.role_name = 'villageois' THEN 'Villageois gagnant'
@@ -93,5 +100,6 @@ JOIN roles r ON r.id_role = pip.id_role
 JOIN parties pa ON pa.id_party = pip.id_party
 JOIN turns t ON t.id_party = pa.id_party
 JOIN players_play pp ON pp.id_player = p.id_player AND pp.id_turn = t.id_turn AND pp.id_party = pa.id_party
-GROUP BY p.pseudo, r.role_name, pa.title_party
+JOIN party_turns pt ON pt.id_party = pa.id_party
+GROUP BY p.pseudo, r.role_name, pa.title_party, pa.is_finished, pt.total_turns
 ORDER BY player_name ASC, party_name ASC, number_of_turns_played DESC;
