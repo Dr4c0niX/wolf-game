@@ -5,7 +5,7 @@ DECLARE
     chosen_row INT;
     chosen_col INT;
 BEGIN
-    -- Récupérer taille grille
+    -- Récupérer la taille de la grille
     SELECT p.grid_size INTO grid_size 
     FROM parties p 
     WHERE p.id_party = party_id;
@@ -15,18 +15,25 @@ BEGIN
         chosen_row := FLOOR(RANDOM() * grid_size);
         chosen_col := FLOOR(RANDOM() * grid_size);
 
-        -- Vérif si position est déjà prise
+        -- Vérifier position est déjà prise par un joueur / obstacle
         IF NOT EXISTS (
-            SELECT 1 FROM players_in_parties 
+            SELECT 1 
+            FROM players_in_parties 
             WHERE id_party = party_id 
             AND current_row = chosen_row 
             AND current_col = chosen_col
+        ) 
+        AND NOT EXISTS (
+            SELECT 1
+            FROM obstacles o
+            WHERE o.id_party = party_id 
+            AND o.row = chosen_row 
+            AND o.col = chosen_col
         ) THEN
             EXIT;
         END IF;
     END LOOP;
 
-    -- Retourner la position choisie
     RETURN QUERY SELECT chosen_row, chosen_col;
 END;
 $$ LANGUAGE plpgsql;
