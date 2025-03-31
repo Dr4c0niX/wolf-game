@@ -1,21 +1,26 @@
-CREATE OR REPLACE FUNCTION random_position(party_id INT) 
-RETURNS SETOF RECORD AS $$
+CREATE OR REPLACE FUNCTION random_position(party_id INT)
+RETURNS TABLE(chosen_row INT, chosen_col INT) AS $$
 DECLARE
-    grid_size INT;
-    chosen_row INT;
-    chosen_col INT;
+    grid_rows INT;
+    grid_cols INT;
+    row_limit INT;
+    col_limit INT;
 BEGIN
-    -- Récupérer la taille de la grille
-    SELECT p.grid_size INTO grid_size 
-    FROM parties p 
-    WHERE p.id_party = party_id;
+    -- Récupérer tailles grille
+    SELECT grid_rows, grid_cols INTO grid_rows, grid_cols
+    FROM parties
+    WHERE id_party = party_id;
 
-    -- Trouver une position non occupée aléatoirement
+    -- Limites grille
+    row_limit := grid_rows;
+    col_limit := grid_cols;
+
+    -- Position non occupée aléatoirement
     LOOP
-        chosen_row := FLOOR(RANDOM() * grid_size);
-        chosen_col := FLOOR(RANDOM() * grid_size);
+        chosen_row := FLOOR(RANDOM() * row_limit);
+        chosen_col := FLOOR(RANDOM() * col_limit);
 
-        -- Vérifier position est déjà prise par un joueur / obstacle
+        -- Vérifier position libre
         IF NOT EXISTS (
             SELECT 1 
             FROM players_in_parties 
@@ -30,11 +35,11 @@ BEGIN
             AND o.row = chosen_row 
             AND o.col = chosen_col
         ) THEN
+            -- Si position libre=>sortir de la boucle
+            RETURN QUERY SELECT chosen_row, chosen_col;
             EXIT;
         END IF;
     END LOOP;
-
-    RETURN QUERY SELECT chosen_row, chosen_col;
 END;
 $$ LANGUAGE plpgsql;
 

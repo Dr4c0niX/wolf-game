@@ -13,7 +13,7 @@ ADD CONSTRAINT check_last_online CHECK (last_online <= CURRENT_TIMESTAMP);
 -- Parties
 CREATE INDEX idx_parties_status ON parties(is_started, is_finished);
 CREATE INDEX idx_parties_created ON parties(created_at);
-CREATE INDEX idx_parties_grid ON parties(grid_size);
+CREATE INDEX idx_parties_rows_cols ON parties(grid_rows, grid_cols);
 CREATE INDEX idx_parties_players ON parties(max_players);
 
 -- Roles
