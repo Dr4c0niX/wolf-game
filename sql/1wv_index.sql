@@ -50,6 +50,10 @@ CREATE INDEX idx_pp_target_pos ON players_play(target_position_row, target_posit
 CREATE INDEX idx_pp_player_turn ON players_play(id_player, id_turn);
 CREATE INDEX idx_pp_party_turn ON players_play(id_party, id_turn);
 
+-- Obstacles
+CREATE INDEX idx_obstacles_position ON obstacles(id_party, position_row, position_col);
+CREATE INDEX idx_obstacles_party ON obstacles(id_party);
+
 -- Requêtes fréquentes
 CREATE INDEX idx_pp_action_positions ON players_play(
     action, 
