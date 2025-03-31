@@ -1,4 +1,3 @@
-
 services:
   db:
     image: postgres:15
@@ -13,7 +12,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./sql:/docker-entrypoint-initdb.d
-    healthcheck:  # <-- Déplacé au niveau des autres propriétés du service db
+    healthcheck:
       test: ["CMD-SHELL", "pg_isready -U wolf_admin -d wolf_game"]
       interval: 5s
       timeout: 5s
@@ -26,11 +25,15 @@ services:
     environment:
       FLASK_ENV: development
       DATABASE_URL: "postgresql://wolf_admin:motdepasse_secure@db/wolf_game"
+      HTTP_SERVER_HOST: "http_server"
+      HTTP_SERVER_PORT: "9000"
     ports:
       - "5000:5000"
     depends_on:
       db:
         condition: service_healthy
+      http_server:
+        condition: service_started
     volumes:
       - ./wolf-admin-engine:/app
 
@@ -38,13 +41,14 @@ services:
     build: ./wolf-http-server
     container_name: wolf_http_server
     ports:
-      - "8080:8080"  # Exposition du port 8080 du conteneur vers l'hôte
+      - "8080:8080"  # Port HTTP
+      - "9000:9000"  # Port TCP pour les notifications
     depends_on:
       db:
         condition: service_healthy
     environment:
-      # Variables d'environnement si nécessaires (ex: URL de la BDD)
       DATABASE_URL: "postgresql://wolf_admin:motdepasse_secure@db/wolf_game"
+      HTTP_SERVER_PORT: "9000"
 
 volumes:
   pgdata:
