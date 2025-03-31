@@ -24,6 +24,9 @@ SELECT * FROM turns;
 CREATE VIEW v_players_play AS
 SELECT * FROM players_play;
 
+-- Vue pour la table obstacles
+CREATE VIEW v_obstacles AS
+SELECT * FROM obstacles;
 
 -- Vues supplémentaires demandées
 
