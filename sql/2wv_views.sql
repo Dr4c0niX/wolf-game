@@ -24,6 +24,9 @@ SELECT * FROM turns;
 CREATE VIEW v_players_play AS
 SELECT * FROM players_play;
 
+-- Vue pour la table obstacles
+CREATE VIEW v_obstacles AS
+SELECT * FROM obstacles;
 
 -- Vues supplémentaires demandées
 
@@ -73,6 +76,7 @@ JOIN turns t ON t.id_party = pa.id_party
 JOIN players_play pp ON pp.id_player = p.id_player AND pp.id_turn = t.id_turn AND pp.id_party = pa.id_party
 ORDER BY player_name ASC, party_name ASC, turn_number ASC;
 
+-- Vue ALL_PLAYERS_STATS
 CREATE VIEW ALL_PLAYERS_STATS AS
 WITH party_turns AS (
     SELECT 

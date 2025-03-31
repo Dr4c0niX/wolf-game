@@ -47,6 +47,15 @@ CREATE TABLE turns (
     UNIQUE (id_party, turn_number)
 );
 
+-- Table des obstacles
+CREATE TABLE obstacles (
+    id_obstacle SERIAL PRIMARY KEY,
+    id_party INT NOT NULL REFERENCES parties(id_party) ON DELETE CASCADE,
+    row INT NOT NULL,
+    col INT NOT NULL,
+    UNIQUE (id_party, row, col) 
+);
+
 -- Table des actions des joueurs
 CREATE TABLE players_play (
     id SERIAL PRIMARY KEY,
