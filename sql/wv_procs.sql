@@ -32,7 +32,6 @@ DECLARE
     rec RECORD;
     existing_player INT;
 BEGIN
-    -- Boucler sur toutes les actions du tour
     FOR rec IN (
         SELECT pp.id_player, pp.origin_position_row, pp.origin_position_col, 
                pp.target_position_row, pp.target_position_col
@@ -40,24 +39,31 @@ BEGIN
         WHERE pp.id_turn = TOUR_ID AND pp.id_party = PARTY_ID
         ORDER BY pp.start_time
     ) LOOP
-        -- Vérif si une autre personne est y est déjà
-        SELECT id_player INTO existing_player
-        FROM players_in_parties
-        WHERE id_party = PARTY_ID AND current_row = rec.target_position_row AND current_col = rec.target_position_col;
-
-        -- Position est libre => déplacer le joueur
-        IF existing_player IS NULL THEN
-            UPDATE players_in_parties
-            SET current_row = rec.target_position_row, current_col = rec.target_position_col
-            WHERE id_party = PARTY_ID AND id_player = rec.id_player;
+        IF EXISTS (
+            SELECT 1 
+            FROM obstacles o 
+            WHERE o.id_party = PARTY_ID 
+              AND o.row = rec.target_position_row 
+              AND o.col = rec.target_position_col
+        ) THEN
+            RAISE NOTICE 'Déplacement impossible : obstacle à la position (% ,%)', rec.target_position_row, rec.target_position_col;
         ELSE
-            -- Conflit loup tue le villageois
-            DELETE FROM players_in_parties
-            WHERE id_party = PARTY_ID AND id_player = existing_player;
+            SELECT id_player INTO existing_player
+            FROM players_in_parties
+            WHERE id_party = PARTY_ID AND current_row = rec.target_position_row AND current_col = rec.target_position_col;
+            IF existing_player IS NULL THEN
+                UPDATE players_in_parties
+                SET current_row = rec.target_position_row, current_col = rec.target_position_col
+                WHERE id_party = PARTY_ID AND id_player = rec.id_player;
+            ELSE
+                DELETE FROM players_in_parties
+                WHERE id_party = PARTY_ID AND id_player = existing_player;
+            END IF;
         END IF;
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- Pseudos en minuscules
 CREATE OR REPLACE PROCEDURE USERNAME_TO_LOWER() AS $$
