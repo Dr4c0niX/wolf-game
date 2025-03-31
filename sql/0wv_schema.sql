@@ -3,7 +3,8 @@ CREATE TABLE parties (
     id_party SERIAL PRIMARY KEY,
     title_party VARCHAR(100) NOT NULL,
     grid_rows INT NOT NULL DEFAULT 10,          
-    grid_cols INT NOT NULL DEFAULT 10,          
+    grid_cols INT NOT NULL DEFAULT 10,
+    obstacles_count INT NOT NULL DEFAULT 0,  -- Ajouté cette ligne
     max_players INT NOT NULL DEFAULT 8,
     max_turns INT NOT NULL DEFAULT 30,
     turn_duration INT NOT NULL DEFAULT 60, -- en secondes
